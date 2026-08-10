@@ -2,15 +2,20 @@
 -- Creates the LVFC club row and its default planner settings.
 -- Run this once, after 0001_init.sql.
 --
--- The join code is what coaches type when they sign up. Change it to something
--- only your coaching staff knows, and change it again if it ever leaks.
+-- The join code is what coaches type when they sign up.
+--
+-- REPLACE THE PLACEHOLDER BELOW before you run this. Anyone holding the code
+-- can create a coach account in your club, so treat it like a door key: give it
+-- only to coaching staff, and change it if it ever gets out.
+--
+-- This repository is public, so a real code must never be committed here.
 -- ============================================================================
 
 insert into public.clubs (name, slug, join_code, settings)
 values (
   'Lahore Virgil Football Club',
   'lvfc',
-  'LVFC-2026',
+  'CHANGE-THIS-BEFORE-RUNNING',
   jsonb_build_object(
     'club',          'LVFC',
     'quarterAnchor', 1,
