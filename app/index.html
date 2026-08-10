@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="color-scheme" content="light dark"/>
+<title>LVFC Session Planner</title>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- ===================== sign in ===================== -->
+<div class="gate" id="gate" hidden>
+  <div class="gate-card">
+    <div class="gate-brand">
+      <svg width="34" height="34" viewBox="0 0 26 26" aria-hidden="true">
+        <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--turf)"/>
+        <path d="M13 2.6v20.8M2.6 13h20.8" stroke="rgba(255,255,255,.5)" stroke-width="1.1"/>
+        <circle cx="13" cy="13" r="4.6" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <circle cx="13" cy="13" r="1.7" fill="#fff"/>
+      </svg>
+      <div><b>Session Planner</b><span id="gateClub">LVFC</span></div>
+    </div>
+
+    <div class="seg gate-seg" id="gateTabs">
+      <button data-tab="in" aria-pressed="true">Sign in</button>
+      <button data-tab="up" aria-pressed="false">Create account</button>
+    </div>
+
+    <form id="gateForm" autocomplete="on">
+      <div class="field gate-only-up" hidden>
+        <label for="gName">Your name</label>
+        <input id="gName" autocomplete="name" placeholder="Coach name"/>
+      </div>
+      <div class="field">
+        <label for="gEmail">Email</label>
+        <input id="gEmail" type="email" autocomplete="email" required placeholder="you@club.com"/>
+      </div>
+      <div class="field">
+        <label for="gPass">Password</label>
+        <input id="gPass" type="password" required minlength="8"
+               autocomplete="current-password" placeholder="At least 8 characters"/>
+      </div>
+      <div class="field gate-only-up" hidden>
+        <label for="gCode">Club join code</label>
+        <input id="gCode" placeholder="e.g. LVFC-2026"/>
+        <p class="gate-hint" id="gCodeHint"></p>
+      </div>
+
+      <p class="gate-msg" id="gateMsg" role="alert" hidden></p>
+
+      <button class="btn primary gate-go" id="gateGo" type="submit">Sign in</button>
+      <div class="gate-links">
+        <button type="button" class="linkbtn" id="gateForgot">Forgot password</button>
+        <button type="button" class="linkbtn" id="gateOffline">Use offline instead</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="app" hidden>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+        <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--turf)"/>
+        <path d="M13 2.6v20.8M2.6 13h20.8" stroke="rgba(255,255,255,.5)" stroke-width="1.1"/>
+        <circle cx="13" cy="13" r="4.6" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <circle cx="13" cy="13" r="1.7" fill="#fff"/>
+      </svg>
+      <div>
+        <b>Session Planner</b>
+        <span id="brandLine" contenteditable="true" spellcheck="false"
+          role="textbox" aria-label="Academy name" title="Click to rename">LVFC</span>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="totals" title="Total session time">
+      <b id="totalMins">0</b><span>min</span>
+    </div>
+
+    <button class="btn" id="btnTemplates">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <rect x="1.6" y="1.6" width="5.2" height="5.2" rx="1.2"/><rect x="9.2" y="1.6" width="5.2" height="5.2" rx="1.2"/>
+        <rect x="1.6" y="9.2" width="5.2" height="5.2" rx="1.2"/><rect x="9.2" y="9.2" width="5.2" height="5.2" rx="1.2"/>
+      </svg>Drill library</button>
+    <div class="who" id="who" hidden>
+      <span class="dot-on" aria-hidden="true"></span>
+      <span class="who-name" id="whoName">Signed in</span>
+      <button class="btn ghost" id="btnLibrary">Library</button>
+      <button class="btn ghost" id="btnSignOut">Sign out</button>
+    </div>
+    <button class="btn" id="btnSetup" title="Club setup">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+        stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/>
+        <path d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.6 3.4l-1.1 1.1M4.5 11.5l-1.1 1.1M12.6 12.6l-1.1-1.1M4.5 4.5 3.4 3.4"
+        stroke-linecap="round"/></svg>Setup</button>
+    <button class="btn" id="btnSave">Save</button>
+    <button class="btn" id="btnLoad">Open</button>
+    <button class="btn primary" id="btnPrint">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <path d="M4.5 6V2.2h7V6M4.5 11.5H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1h-1.5"/>
+        <rect x="4.5" y="9.6" width="7" height="4.2" rx=".8"/>
+      </svg>Print / PDF</button>
+  </header>
+
+  <section class="curric" aria-label="Curriculum position">
+    <div class="curric-picks">
+      <div class="field">
+        <label for="mAge">Age group</label>
+        <select id="mAge">
+          <option value="U8">Ages 7-8</option><option value="U10">Ages 9-10</option>
+          <option value="U12">Ages 11-12</option><option value="13+">Ages 13+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="mMonth">Month</label>
+        <select id="mMonth"><option value="1">Month 1</option><option value="2">Month 2</option>
+          <option value="3">Month 3</option></select>
+      </div>
+      <div class="field">
+        <label for="mBlock">Weeks</label>
+        <select id="mBlock"><option value="w12">Weeks 1 &amp; 2</option>
+          <option value="w34">Weeks 3 &amp; 4</option></select>
+      </div>
+      <div class="field">
+        <label for="mDay">Session</label>
+        <select id="mDay"></select>
+      </div>
+      <div class="field">
+        <label for="mDate">Date</label>
+        <input id="mDate" type="date"/>
+      </div>
+      <div class="field">
+        <label for="mCoach">Coach</label>
+        <input id="mCoach" placeholder="Your name"/>
+      </div>
+      <button class="btn primary" id="btnBuild" style="align-self:flex-end;height:36px">
+        Build this session</button>
+    </div>
+    <div class="curric-read" id="curricRead"></div>
+  </section>
+
+  <div class="meta" style="grid-template-columns:1fr">
+    <div class="field">
+      <label for="mTitle">Session title</label>
+      <input id="mTitle" placeholder="Auto-filled from the curriculum &mdash; edit if you want"/>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <!-- ============ palette ============ -->
+    <aside class="panel rail" aria-label="Pitch elements">
+      <div class="panel-h"><h2>Add to pitch</h2></div>
+
+      <div class="pal-group">
+        <p class="pal-title">Players</p>
+        <div class="pal-grid" id="palPlayers"></div>
+      </div>
+
+      <div class="pal-group">
+        <p class="pal-title">Equipment</p>
+        <div class="pal-grid" id="palKit"></div>
+      </div>
+
+      <div class="pal-group">
+        <p class="pal-title">Movement</p>
+        <div class="pal-grid wide" id="palArrows"></div>
+      </div>
+
+      <div class="pal-group">
+        <button class="tool wide-t" id="toolSelect" aria-pressed="true" style="width:100%">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M3 2.2l9.4 5.2-4 1.1-1.6 4z" stroke-linejoin="round"/>
+          </svg><em>Select &amp; move</em>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============ pitch ============ -->
+    <section class="stage" aria-label="Drill designer">
+      <div class="stage-bar">
+        <span class="bar-label">Pitch</span>
+        <div class="seg" id="pitchSeg"></div>
+        <div class="spacer"></div>
+        <span class="hint"><kbd>Del</kbd> remove <kbd>Esc</kbd> deselect</span>
+        <button class="btn ghost" id="btnUndo" title="Undo (Cmd/Ctrl+Z)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M2.6 6.4h7.2a3.6 3.6 0 0 1 0 7.2H6"/><path d="M5.4 3.2 2.4 6.4l3 3.2"/>
+          </svg>Undo</button>
+        <button class="btn ghost danger" id="btnClear">Clear pitch</button>
+      </div>
+
+      <svg id="board" viewBox="0 0 1000 640" role="img" aria-label="Drill diagram"></svg>
+
+      <div class="strip">
+        <div class="strip-h">
+          <h2>Session running order</h2>
+          <div class="spacer"></div>
+          <button class="btn ghost" id="btnDup">Duplicate</button>
+          <button class="btn ghost" id="btnLeft" title="Move earlier">&larr;</button>
+          <button class="btn ghost" id="btnRight" title="Move later">&rarr;</button>
+          <button class="btn ghost danger" id="btnDelDrill">Delete drill</button>
+        </div>
+        <div class="cards" id="cards"></div>
+      </div>
+    </section>
+
+    <!-- ============ inspector ============ -->
+    <aside class="insp">
+      <div class="panel" id="selPanel">
+        <div class="panel-h"><h2>Selected item</h2></div>
+        <div id="selBody"><p class="sel-none">Nothing selected.<br/>Click an item on the pitch to change its kit, size or angle.</p></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h2>Session check</h2>
+          <button class="btn ghost" id="btnMethod" style="padding:3px 8px;font-size:11.5px">Methodology</button>
+        </div>
+        <div class="insp-body" id="checkBody"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h2>Practice notes</h2></div>
+        <div class="insp-body">
+          <div class="two">
+            <div class="field">
+              <label for="dName">Practice name</label>
+              <input id="dName" placeholder="e.g. Four Goal Game"/>
+            </div>
+            <div class="field">
+              <label for="dMins">Minutes</label>
+              <input id="dMins" type="number" min="1" max="120" step="5"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Principles this serves</label>
+            <div class="chips" id="dPrin"></div>
+          </div>
+
+          <div class="field">
+            <label for="dRoll">Ball rolling time &mdash; <b id="rollVal">70</b>%</label>
+            <input id="dRoll" type="range" min="0" max="100" step="5"/>
+          </div>
+
+          <div class="field">
+            <label for="dOrg">Organisation</label>
+            <textarea id="dOrg" rows="3" placeholder="Area size, numbers, how it restarts&hellip;"></textarea>
+          </div>
+          <div class="field">
+            <label for="dScore">Scoring system</label>
+            <textarea id="dScore" rows="2" placeholder="How do they compete? What earns bonus points?"></textarea>
+          </div>
+          <div class="field">
+            <label for="dPts">What I'm looking for</label>
+            <textarea id="dPts" rows="3" placeholder="One per line &mdash; observable, not instructions."></textarea>
+          </div>
+          <div class="field">
+            <label for="dQ">Guided questions</label>
+            <textarea id="dQ" rows="3" placeholder="Questions that make them work it out themselves&hellip;"></textarea>
+          </div>
+          <div class="field">
+            <label for="dDiff">Differentiation</label>
+            <textarea id="dDiff" rows="3" placeholder="Easier: &hellip;  Harder: &hellip;"></textarea>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============ modal ============ -->
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-h">
+      <div style="flex:1">
+        <h2 id="modalTitle">Drill library</h2>
+        <p id="modalSub">Pick a drill &mdash; it drops in fully set up, with coaching points already written.</p>
+      </div>
+      <button class="btn ghost" id="btnCloseModal" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="modal-b" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="print"></div>
+</div>
+<script id="lvfcCfg" type="application/json">null</script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="planner.js"></script>
+<script src="cloud.js"></script>
+</body>
+</html>
