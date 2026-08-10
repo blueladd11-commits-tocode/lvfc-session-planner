@@ -332,6 +332,11 @@ function blankDrill(name){
 }
 /* older saved sessions predate the methodology fields - fill them in */
 function upgrade(d){
+  // Sessions saved before durations were derived carry a flat 15 minutes on
+  // blocks the curriculum fixes at another length (Gamification is 10). Repair
+  // them on load so nobody has to rebuild a session by hand.
+  const cm = blockMinutes(d.name);
+  if(d.mins === 15 && cm !== 15) d.mins = cm;
   if(!Array.isArray(d.prin)) d.prin = [];
   ["org","pts","questions","scoring","diff"].forEach(k => { if(typeof d[k] !== "string") d[k] = ""; });
   if(typeof d.rolling !== "number") d.rolling = 70;
