@@ -532,7 +532,7 @@ function thumbSVG(d){
    ============================================================ */
 function LIB(){ return [
   {
-    name:"Ball Mastery Arrival", mins:12, pitch:"area", tag:"Arrival", rolling:95,
+    name:"Ball Mastery Arrival", fit:["arrival","dribbling"], mins:12, pitch:"area", tag:"Arrival", rolling:95,
     prin:[1,4,9,8],
     org:"A ball each in a 25x25 area. Players move freely from the moment they arrive.\nNo lines, no queue, no waiting - late arrivals just join in.\nCoach calls a skill every 60-90 seconds.",
     pts:"Every player touching a ball constantly\nHead up while dribbling, not staring down\nBravery to try the skill badly first time\nEnergy and noise in the area",
@@ -548,7 +548,7 @@ function LIB(){ return [
     ]
   },
   {
-    name:"1v1 Creativity Zone", mins:15, pitch:"area", tag:"Duels", rolling:85,
+    name:"1v1 Creativity Zone", fit:["dribbling","duels"], mins:15, pitch:"area", tag:"Duels", rolling:85,
     prin:[4,10,3,5],
     org:"Three channels side by side. 1v1 in each channel, ball starts with the attacker.\nScore by dribbling through the gate at the far end.\nNew pair goes immediately - continuous, no waiting.",
     pts:"Players attacking at speed, not slowing down\nWillingness to try a skill in a real duel\nDefender side-on, showing one way\nReaction after losing it - do they go again?",
@@ -564,7 +564,7 @@ function LIB(){ return [
     ]
   },
   {
-    name:"Rondo 5v2", mins:12, pitch:"area", tag:"Possession", rolling:88,
+    name:"Rondo 5v2", fit:["possession","passing","receiving"], mins:12, pitch:"area", tag:"Possession", rolling:88,
     prin:[2,3,6],
     org:"18x18 square. 5 outside, 2 inside. Two touches.\nDefenders swap in when they win it or force it out - instant restart with a spare ball.",
     pts:"Body open before the ball arrives\nWeight of pass into the back foot\nMovement after passing, not admiring it\nBravery to split the two defenders",
@@ -580,7 +580,7 @@ function LIB(){ return [
     ]
   },
   {
-    name:"Four Goal Game", mins:18, pitch:"area", tag:"Game", rolling:92,
+    name:"Four Goal Game", fit:["possession","decisions"], mins:18, pitch:"area", tag:"Game", rolling:92,
     prin:[3,6,5,9],
     org:"30x24 pitch, two mini goals on each end line. 4v4, no keepers.\nEither goal counts - players choose which one to attack.",
     pts:"Heads up to spot the open goal\nSwitching play when one side is crowded\nQuick decisions, not slow build-up\nEveryone involved in both directions",
@@ -596,7 +596,7 @@ function LIB(){ return [
     ]
   },
   {
-    name:"Transition Game 4v4+2", mins:18, pitch:"area", tag:"Transition", rolling:90,
+    name:"Transition Game 4v4+2", fit:["transition","decisions"], mins:18, pitch:"area", tag:"Transition", rolling:90,
     prin:[2,3,6,5],
     org:"30x24 area. 4v4 with two neutrals who always play for the team in possession.\nWhen the ball goes out, coach serves a new one immediately from the side.",
     pts:"Reaction in the first 3 seconds after turnover\nNeutrals finding the free side quickly\nCounter-pressing straight away\nNo stoppages - the game keeps rolling",
@@ -613,7 +613,7 @@ function LIB(){ return [
     ]
   },
   {
-    name:"End Zone Game", mins:18, pitch:"area", tag:"Game", rolling:88,
+    name:"End Zone Game", fit:["receiving","passing","decisions"], mins:18, pitch:"area", tag:"Game", rolling:88,
     prin:[3,6,5,2],
     org:"30x24 pitch with a 3-yard end zone at each end. 4v4.\nScore by passing to a team-mate who receives the ball under control in the end zone.",
     pts:"Runners timing arrival into the end zone\nPlayers scanning before they receive\nPasses played in front of the runner\nDefenders tracking runners, not just the ball",
@@ -630,7 +630,7 @@ function LIB(){ return [
     ]
   },
   {
-    name:"Small-Sided Game", mins:20, pitch:"area", tag:"Game", rolling:94,
+    name:"Small-Sided Game", fit:["game","decisions"], mins:20, pitch:"area", tag:"Game", rolling:94,
     prin:[5,9,3,10],
     org:"30x24 pitch, mini goals. 4v4, no keepers. Rolling subs every 3 minutes.\nLet it flow - coach within the game rather than stopping it.",
     pts:"Width and depth when we have it\nFirst forward pass when it is on\nPressing as a unit\nPlayers solving it themselves without being told",
@@ -646,7 +646,94 @@ function LIB(){ return [
     ]
   },
   {
-    name:"2v2 Continuous Duels", mins:15, pitch:"area", tag:"Duels", rolling:86,
+    name:"Finishing Waves", fit:["finishing","dribbling"], mins:18, pitch:"third", tag:"Finishing", rolling:88,
+    prin:[1,5,10,9],
+    org:"Two lines wide of the box, each with a ball. Server plays in, attacker takes one touch and finishes.\nNext wave goes the moment the ball leaves the last one - keeper stays live.",
+    pts:"Shot inside 2 touches\nHead up to find the keeper's position\nLaces through the middle of the ball\nFollow the shot in for rebounds",
+    questions:"Where was the keeper before you struck it?\nWhat told you to place it rather than hit it?\nWhich finish felt most repeatable?",
+    scoring:"1 point on target, 2 for a goal, 3 for a first-time finish. Best of 10 per pair.",
+    diff:"Easier: start closer, no keeper pressure.\nHarder: defender recovering from behind, or one touch only.",
+    items:[
+      G(954,320,-90), P("g",900,320,"1"),
+      P("a",560,150,""), B(590,150), P("a",560,490,""), B(590,490),
+      P("a",700,240,""), P("a",700,410,""),
+      A("pass",600,158,690,232), A("shot",720,250,930,300),
+      A("pass",600,482,690,418), A("shot",720,405,930,345),
+      C(520,150), C(520,490)
+    ]
+  },
+  {
+    name:"Receiving to Turn", fit:["receiving","passing"], mins:16, pitch:"area", tag:"Receiving", rolling:86,
+    prin:[2,3,6,1],
+    org:"20x20 area, players in threes. Server, receiver in the middle, defender behind the receiver.\nReceiver checks away, receives on the half turn and plays out the other side. Rotate every 90 seconds.",
+    pts:"Scan over the shoulder before it arrives\nFirst touch out of the feet, away from the defender\nBody open, not square to the passer\nHead up immediately after the touch",
+    questions:"What did you see behind you before you received?\nWhich foot should take the first touch, and why?\nHow do you make the defender commit early?",
+    scoring:"1 point for every clean turn and pass out. Lose it and the defender takes over.",
+    diff:"Easier: defender passive.\nHarder: two touches maximum, or a second defender.",
+    items:[
+      C(180,140), C(820,140), C(180,500), C(820,500),
+      P("a",210,320,"S"), B(245,320),
+      P("a",500,320,""), P("b",560,320,""),
+      P("a",800,320,"T"),
+      A("pass",265,320,470,320), A("run",500,270,470,215),
+      A("pass",530,300,775,315),
+      T(500,150,"Check away, then receive")
+    ]
+  },
+  {
+    name:"Defending 1v1 Channels", fit:["defending","duels"], mins:16, pitch:"area", tag:"Defending", rolling:82,
+    prin:[3,6,10,5],
+    org:"Three channels. Attacker starts with the ball, defender closes from the gate.\nDefender wins by forcing them out or winning it cleanly. Swap every rep.",
+    pts:"Close the ground fast, then slow down\nSide-on, showing them one way\nStay on your feet, do not dive in\nWin it and play out, do not just clear it",
+    questions:"Which way did you want to send them, and did you?\nWhen do you go to win it rather than delay?\nWhat happens if you rush the last two steps?",
+    scoring:"Defender 2 points for winning it, 1 for forcing them out. Attacker 2 for getting through.",
+    diff:"Easier: bigger channel, defender starts closer.\nHarder: attacker gets a head start, or 2v1.",
+    items:[
+      C(180,110), C(820,110), C(180,290), C(820,290), C(180,470), C(820,470), C(180,580), C(820,580),
+      P("a",700,190,""), B(672,190), P("b",380,190,""),
+      P("a",700,380,""), B(672,380), P("b",380,380,""),
+      P("a",700,520,""), P("b",380,520,""),
+      A("run",420,190,600,190), A("dribble",650,385,470,400)
+    ]
+  },
+  {
+    name:"Shielding Under Pressure", fit:["shielding","dribbling"], mins:14, pitch:"area", tag:"Ball retention", rolling:90,
+    prin:[1,10,4,9],
+    org:"15x15 area, a ball each for half the group. Ball carriers keep possession under light pressure.\nDefenders try to knock balls out. Swap roles every 90 seconds.",
+    pts:"Big body between defender and ball\nArm across, forearm up, staying legal\nHead up scanning for the way out\nTurn out only when the pressure eases",
+    questions:"Where should your body be before they arrive?\nWhat tells you the moment to turn away?\nHow do you keep the ball furthest from them?",
+    scoring:"Keep it for 20 seconds under pressure = 1 point. Losing it gives the point away.",
+    diff:"Easier: bigger area, one defender fewer.\nHarder: shrink the area, defenders work in pairs.",
+    items:[
+      P("a",300,220,""), B(272,228), P("b",360,200,""),
+      P("a",560,180,""), B(588,190), P("b",620,165,""),
+      P("a",380,450,""), B(352,458), P("b",440,470,""),
+      P("a",680,420,""), B(708,430), P("b",740,400,""),
+      C(180,120), C(820,120), C(180,540), C(820,540),
+      T(500,90,"Body between, head up")
+    ]
+  },
+  {
+    name:"Support Angles 3v1", fit:["passing","possession"], mins:14, pitch:"area", tag:"Passing", rolling:88,
+    prin:[2,3,6,8],
+    org:"12x12 grids, 3v1 in each. Three attackers keep the ball, one defender presses.\nAttackers must move after every pass - no standing still.",
+    pts:"Angle of support, never in the defender's shadow\nPass to the far foot\nMove the moment you have passed\nCommunicate early and clearly",
+    questions:"Where should you stand so the passer has two options?\nWhat makes the angle bad?\nHow quickly can you move after passing?",
+    scoring:"8 passes in a row = 1 point. Defender wins it and swaps with whoever lost it.",
+    diff:"Easier: bigger grid, unlimited touches.\nHarder: two touches, then one.",
+    items:[
+      C(220,160), C(560,160), C(560,480), C(220,480),
+      P("a",250,200,""), B(285,215), P("a",530,200,""), P("a",390,460,""),
+      P("b",400,300,""),
+      A("pass",310,215,505,205), A("run",250,240,300,330),
+      C(640,160), C(940,160), C(640,480), C(940,480),
+      P("a",670,200,""), B(700,215), P("a",910,210,""), P("a",790,460,""),
+      P("b",790,300,"")
+    ]
+  }
+,
+  {
+    name:"2v2 Continuous Duels", fit:["duels","dribbling"], mins:15, pitch:"area", tag:"Duels", rolling:86,
     prin:[1,5,10,4],
     org:"20x20 area, mini goal at each end. 2v2.\nAs soon as a goal goes in or the ball leaves, the next pair enters immediately from the side with a new ball.\nWaves keep coming - nobody stands still.",
     pts:"Immediate intensity from the first touch\nCombining with your partner under pressure\nRecovering quickly when the next wave starts\nPlayers still trying skills when tired",
@@ -668,6 +755,27 @@ const QUICK = {
   parts:["Ball Mastery Arrival","Rondo 5v2","Small-Sided Game"],
   alt:  ["Ball Mastery Arrival","1v1 Creativity Zone","Four Goal Game"]
 };
+
+
+/* Which practice themes suit the curriculum block currently selected.
+   Read from the block's own wording so it stays true to the curriculum. */
+function blockThemes(){
+  const q = curr();
+  const txt = (q.b.title + " " + q.b.tech + " " + q.b.tact + " " + q.m.focus).toLowerCase();
+  const hit = (re) => re.test(txt);
+  const out = [];
+  if(hit(/dribbl|turning|feint|scissor|stepover|ball mastery|manipulat|running with/)) out.push("dribbling");
+  if(hit(/shield|protect/))                       out.push("shielding");
+  if(hit(/1v1|duel|isolat/))                      out.push("duels");
+  if(hit(/shoot|finish|striking|goal-scoring/))   out.push("finishing");
+  if(hit(/receiv|first touch|half-turn|control/)) out.push("receiving");
+  if(hit(/pass|support|angle|rondo|combinat/))    out.push("passing");
+  if(hit(/possess|overload|compact/))             out.push("possession");
+  if(hit(/transition|counter|regain|winning|losing/)) out.push("transition");
+  if(hit(/defend|jockey|press|tackl|delay/))      out.push("defending");
+  if(hit(/scan|decision|awareness|shape|width|role/)) out.push("decisions");
+  return out;
+}
 
 /* ============================================================
    rendering
@@ -1196,6 +1304,25 @@ const closeModal = () => $("scrim").hidden = true;
 function libraryHTML(){
   const q = curr();
   const mins = q.d.blocks.reduce((a,b) => a + b[1], 0);
+  const themes = blockThemes();
+  const allowed = LIB().map((t,i) => [t,i])
+    .filter(([t]) => !CFG.practices || CFG.practices.indexOf(t.name) >= 0);
+
+  const score = (t) => (t.fit || []).filter(f => themes.indexOf(f) >= 0).length;
+  const fits    = allowed.filter(([t]) => score(t) > 0)
+                         .sort((a,b) => score(b[0]) - score(a[0]));
+  const others  = allowed.filter(([t]) => score(t) === 0);
+
+  const card = ([t,i]) => `<button class="tcard" data-lib="${i}">
+      <div class="thumb">${thumbSVG({pitch:t.pitch, items:t.items})}</div>
+      <div class="tb"><b>${esc(t.name)}</b>
+        <em>${esc(t.tag)} &middot; ${t.mins} min &middot; ${t.rolling}% rolling</em>
+        <div class="chips" style="margin-top:6px">${
+          t.prin.slice(0,3).map(id => `<span class="chip" aria-pressed="false"
+            style="cursor:default">${PRINBY[id].short}</span>`).join("")}</div>
+      </div>
+    </button>`;
+
   return `<div class="starts">
     <button class="start" data-quick="1">
       <span class="ic"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor"
@@ -1209,21 +1336,16 @@ function libraryHTML(){
         stroke-width="1.8" aria-hidden="true"><path d="M8 3.4v9.2M3.4 8h9.2" stroke-linecap="round"/></svg></span>
       <span><b>Start from blank</b><em>An empty pitch. Place players and equipment yourself.</em></span>
     </button>
-  </div>
-  <p class="pal-title" style="margin:0 0 9px 2px">Practices &mdash; drop a diagram into any block</p>
-  <div class="tgrid">` +
-  LIB().map((t,i) => [t,i]).filter(([t]) => !CFG.practices || CFG.practices.indexOf(t.name) >= 0)
-    .map(([t,i]) => `<button class="tcard" data-lib="${i}">
-      <div class="thumb">${thumbSVG({pitch:t.pitch, items:t.items})}</div>
-      <div class="tb"><b>${esc(t.name)}</b>
-        <em>${esc(t.tag)} &middot; ${t.mins} min &middot; ${t.rolling}% rolling</em>
-        <div class="chips" style="margin-top:6px">${
-          t.prin.slice(0,3).map(id => `<span class="chip" aria-pressed="false"
-            style="cursor:default">${PRINBY[id].short}</span>`).join("")}</div>
-      </div>
-    </button>`).join("") + `</div>`;
-}
+  </div>` +
 
+  (fits.length ? `<p class="pal-title" style="margin:0 0 9px 2px">
+      Suits this week &mdash; ${esc(q.b.title)}</p>
+    <div class="tgrid">${fits.map(card).join("")}</div>` : "") +
+
+  (others.length ? `<p class="pal-title" style="margin:${fits.length ? "18px" : "0"} 0 9px 2px">
+      ${fits.length ? "Everything else" : "Practices"} &mdash; all game-based, none cone-only</p>
+    <div class="tgrid">${others.map(card).join("")}</div>` : "");
+}
 
 function adminHTML(){
   const chk = (k,on,label,note) =>

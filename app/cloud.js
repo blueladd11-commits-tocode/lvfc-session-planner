@@ -270,6 +270,59 @@
       showApp();
       P.toast("Offline mode - sessions save to this device only");
     };
+
+    $("gateSetup").onclick = openConnect;
+  }
+
+  /* ------------------------------------------------------------- connect -- */
+  // Lets an admin paste the two Supabase values and checks the project before
+  // any coach ever sees a sign-in box.
+  function openConnect() {
+    const cur = Setup.saved() || {};
+    P.openModal(
+      "Connect a backend",
+      "Paste the two values from Supabase: Project Settings, then API.",
+      `<div class="field"><label for="suUrl">Project URL</label>
+         <input id="suUrl" placeholder="https://yourproject.supabase.co" value="${esc(cur.url || "")}"/></div>
+       <div class="field" style="margin-top:10px"><label for="suKey">Anon / public key</label>
+         <input id="suKey" placeholder="eyJ..." value="${esc(cur.key || "")}"/>
+         <p class="gate-hint">This key is meant to be public. Never paste the service_role key here.</p></div>
+       <div class="arow" style="margin-top:14px">
+         <button class="btn primary" id="suTest">Check and save</button>
+         <button class="btn" id="suClear">Forget it</button>
+       </div>
+       <div id="suOut"></div>`
+    );
+
+    $("suClear").onclick = () => {
+      Setup.clear();
+      P.toast("Backend settings cleared - reload to start over");
+    };
+
+    $("suTest").onclick = async () => {
+      const url = $("suUrl").value.trim();
+      const key = $("suKey").value.trim();
+      const btn = $("suTest");
+      btn.disabled = true;
+      $("suOut").innerHTML = '<p class="sel-none">Checking&hellip;</p>';
+      const rows = await Setup.diagnose(url, key);
+      const allOk = rows.every((r) => r.ok);
+      $("suOut").innerHTML =
+        '<div class="diag">' +
+        rows
+          .map(
+            (r) => `<div class="diagrow ${r.ok ? "ok" : "no"}"><span class="dot"></span>
+              <span><b>${esc(r.label)}</b><em>${esc(r.detail)}</em></span></div>`
+          )
+          .join("") +
+        "</div>" +
+        (allOk
+          ? '<p class="gate-msg ok" style="margin-top:12px">Everything checks out. Saved &mdash; reload and sign in.</p>'
+          : '<p class="gate-msg bad" style="margin-top:12px">Fix the items above, then check again. ' +
+            "Nothing was saved.</p>");
+      if (allOk) Setup.store(url, key);
+      btn.disabled = false;
+    };
   }
 
   /* ---------------------------------------------------------------- boot -- */

@@ -1,0 +1,19 @@
+# Runs the access-control tests. No dependencies beyond Python.
+name: Tests
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  access-control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Start mock backend
+        run: |
+          python3 tools/mock_supabase.py --port 8788 --reset &
+          sleep 2
+      - name: Access control tests
+        run: python3 tools/test_access.py
