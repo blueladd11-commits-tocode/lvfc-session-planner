@@ -275,9 +275,14 @@ function derive(dateStr){
   const day   = WEEKDAY_DAY[d.getDay()] || null;   // Sunday has no session
   return {month, block, day, weekday:d.getDay()};
 }
+/* True once a coach has deliberately picked a month, week block or session.
+   Their choice then stands until the date changes, which re-derives. */
+let posOverridden = false;
+
 /* apply the derived position, respecting which days the club actually runs */
 function applyDerived(){
   if(!CFG.autoPosition) return;
+  if(posOverridden && CFG.allowOverride) return;
   const dv = derive(S.date);
   if(!dv) return;
   S.month = dv.month;
@@ -808,7 +813,9 @@ function renderCards(){
     cur = +b.dataset.i; sel = null; syncFields(); render();
   });
   $("addDrill").onclick = () => {
-    snap(); S.drills.push(blankDrill("Drill " + (S.drills.length+1)));
+    snap();
+    const nb = nextBlock(S.drills.length);
+    S.drills.push(practiceFromBlock(nb.name, nb.mins));
     cur = S.drills.length-1; sel = null; syncFields(); render(); save();
   };
 }
@@ -1151,14 +1158,13 @@ function renderCurric(){
         q.d.blocks.map(b => b[1] + "' " + esc(b[0])).join(" &middot; ")} &middot; ${mins} min</span></div>`;
 }
 
-/* builds the session the curriculum prescribes for this point in the cycle */
-function buildSession(){
+/* One practice, derived from the curriculum. A coach should never have to
+   invent a name or retype the week's focus - the cycle already decides both. */
+function practiceFromBlock(name, mins){
   const q = curr();
-  snap();
-  S.drills = q.d.blocks.map(([name, mins]) => {
-    const d = blankDrill(name);
-    const arrival = /Gamification|Arrival/i.test(name);
-    d.mins = mins;
+  const d = blankDrill(name);
+  const arrival = /Gamification|Arrival/i.test(name);
+  d.mins = mins;
     // an arrival activity is never the match format - it is a ball each, no queues
     d.org = arrival
       ? "Ball each, free area. No lines and no waiting - late arrivals join straight in.\nCoach calls a "
@@ -1179,10 +1185,24 @@ function buildSession(){
                  d.scoring = "Beat your own count in 30 seconds, then go again."; }
     else if(/Technical/i.test(name)) { d.pts = q.b.tech; d.questions = "What did that touch let you do next?"; }
     else if(/Tactical|Development/i.test(name)) { d.pts = q.b.tact; d.questions = "What did you see before you decided?"; }
-    else if(/Match|Festival|SSG/i.test(name))   { d.pts = q.b.tact;
-      d.scoring = "Conditioned rule that rewards the weekly theme: " + q.b.title + "."; }
-    return d;
-  });
+  else if(/Match|Festival|SSG/i.test(name))   { d.pts = q.b.tact;
+    d.scoring = "Conditioned rule that rewards the weekly theme: " + q.b.title + "."; }
+  return d;
+}
+
+/* What the next practice in this session should be called. Continues the day's
+   shape; once that is exhausted it falls back to the week's own title. */
+function nextBlock(i){
+  const q = curr();
+  const b = q.d.blocks[i];
+  return b ? {name:b[0], mins:b[1]} : {name:q.b.title, mins:15};
+}
+
+/* builds the session the curriculum prescribes for this point in the cycle */
+function buildSession(){
+  const q = curr();
+  snap();
+  S.drills = q.d.blocks.map(([name, mins]) => practiceFromBlock(name, mins));
   S.title = q.c.label + " " + q.b.title + " - " + q.d.short;
   cur = 0; sel = null; armed = null;
   syncFields(); paintTools(); render(); save();
@@ -1266,10 +1286,10 @@ function bindFields(){
   };
   bind("mTitle", v => S.title = v);
   bind("mAge",   v => { S.age = v; renderDays(); renderCurric(); });
-  bind("mMonth", v => { S.month = +v; renderCurric(); });
-  bind("mBlock", v => { S.block = v; renderCurric(); });
-  bind("mDay",   v => { S.day = v; renderCurric(); });
-  bind("mDate",  v => { S.date = v; applyDerived(); syncFields(); renderCurric(); });
+  bind("mMonth", v => { S.month = +v; posOverridden = true; renderCurric(); });
+  bind("mBlock", v => { S.block = v; posOverridden = true; renderCurric(); });
+  bind("mDay",   v => { S.day = v;   posOverridden = true; renderCurric(); });
+  bind("mDate",  v => { S.date = v; posOverridden = false; applyDerived(); syncFields(); renderCurric(); });
   bind("mCoach", v => S.coach = v);
   bind("dName",  v => drill().name = v, renderCards);
   bind("dMins",  v => { drill().mins = Math.max(0, +v || 0);
@@ -1516,7 +1536,7 @@ function wireLibrary(){
   const bl = b.querySelector("[data-blank]");
   if(bl) bl.onclick = () => {
     snap();
-    S.drills = [blankDrill("Warm-up")];
+    S.drills = [practiceFromBlock(nextBlock(0).name, nextBlock(0).mins)];
     cur = 0; sel = null; armed = null;
     closeModal(); syncFields(); paintTools(); render(); save();
   };
@@ -1727,7 +1747,7 @@ window.Planner = {
   libraryHTML, wireLibrary, adminHTML, wireAdmin, methodHTML,
   blankSession, upgrade, thumbSVG, drillSVG, buildPrint,
   getS:   () => S,
-  setS:   (x) => { S = upgradeSession(x); cur = 0; sel = null; undoStack = []; syncFields(); render(); },
+  setS:   (x) => { S = upgradeSession(x); posOverridden = true; cur = 0; sel = null; undoStack = []; syncFields(); render(); },
   getCFG: () => CFG,
   setCFG: (c) => { CFG = Object.assign({}, CFG_DEFAULT, c || {}); syncFields(); render(); },
   reset:  () => { S = blankSession(); cur = 0; sel = null; undoStack = []; syncFields(); render(); }
