@@ -83,11 +83,16 @@
   /* -------------------------------------------------------- session sync -- */
   function queueSave(S) {
     if (offline || !API.signedIn() || !profile) return;
+    // Don't put an untouched draft in the library. Once a coach has drawn or
+    // written anything it saves itself from then on, without them pressing Save.
+    if (!currentId && !P.hasContent()) return;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => void pushSession(S), 1200);
   }
 
   async function pushSession(S) {
+    // a session always reaches the library with a name it earned
+    if (!(S.title || "").trim()) S.title = P.autoTitle();
     try {
       if (currentId) {
         await API.updateSession(currentId, S, profile);

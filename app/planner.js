@@ -1764,6 +1764,13 @@ window.Planner = {
   render, syncFields, save, toast, openModal, closeModal,
   libraryHTML, wireLibrary, adminHTML, wireAdmin, methodHTML,
   blankSession, upgrade, thumbSVG, drillSVG, buildPrint,
+  autoTitle: () => { const q = curr(); return q.c.label + " " + q.b.title + " - " + q.d.short; },
+  // Worth keeping? Something drawn on a pitch, a session with real structure,
+  // or a title the coach chose. Notes pre-filled from the curriculum are not
+  // the coach's work, so they don't count - otherwise merely opening a blank
+  // session would file it in the library. Pressing Save always saves.
+  hasContent: () => S.drills.some(d => d.items && d.items.length)
+    || S.drills.length > 1 || Boolean((S.title||"").trim()),
   getS:   () => S,
   setS:   (x) => { S = upgradeSession(x); posOverridden = true; cur = 0; sel = null; undoStack = []; syncFields(); render(); },
   getCFG: () => CFG,
