@@ -23,8 +23,10 @@ In the Supabase dashboard, open **SQL Editor**, then run each file in order:
 1. Paste all of `supabase/migrations/0001_init.sql` and run it.
 2. Paste all of `supabase/migrations/0002_seed_club.sql` and run it.
 
-The second one creates the club and its join code. **Change the join code**
-from `LVFC-2026` to something only your staff knows:
+The second one creates the club and its join code. It ships with the
+placeholder `CHANGE-THIS-BEFORE-RUNNING` on purpose - this repository is
+public, so a working code must never live in it. **Set your own** before or
+just after running the file:
 
 ```sql
 update public.clubs set join_code = 'YOUR-CODE-HERE' where slug = 'lvfc';
