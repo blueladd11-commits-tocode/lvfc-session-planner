@@ -312,8 +312,21 @@ const nid = () => "i" + (uid++) + Math.random().toString(36).slice(2,6);
 
 const drill = () => S.drills[cur];
 
+/* The curriculum fixes how long each named block runs - Gamification is always
+   10 minutes, a Match / Festival Stage 45. Look the name up rather than
+   defaulting everything to 15. */
+function blockMinutes(name){
+  for(const set of [DAYS, DAYS13]){
+    for(const k in set){
+      const hit = set[k].blocks.find(b => b[0] === name);
+      if(hit) return hit[1];
+    }
+  }
+  return 15;
+}
+
 function blankDrill(name){
-  return {id:nid(), name:name||"New practice", mins:15, pitch:"area",
+  return {id:nid(), name:name||"New practice", mins:blockMinutes(name), pitch:"area",
           org:"", pts:"", questions:"", scoring:"", diff:"",
           prin:[], rolling:70, items:[]};
 }
@@ -1195,7 +1208,7 @@ function practiceFromBlock(name, mins){
 function nextBlock(i){
   const q = curr();
   const b = q.d.blocks[i];
-  return b ? {name:b[0], mins:b[1]} : {name:q.b.title, mins:15};
+  return b ? {name:b[0], mins:b[1]} : {name:q.b.title, mins:blockMinutes(q.b.title)};
 }
 
 /* builds the session the curriculum prescribes for this point in the cycle */
