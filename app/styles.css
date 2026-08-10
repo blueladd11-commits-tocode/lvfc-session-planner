@@ -178,7 +178,7 @@ select:disabled,input:disabled{opacity:.55;cursor:not-allowed;background:var(--s
 .it.sel .halo{opacity:1}
 .halo{opacity:0;transition:opacity .1s}
 
-/* drill strip */
+/* practice strip */
 .strip{border-top:1px solid var(--line);background:var(--sunk);padding:9px 10px}
 .strip-h{display:flex;align-items:center;gap:9px;margin-bottom:8px}
 .strip-h h2{margin:0;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;

@@ -18,9 +18,9 @@ focus for that exact point in the cycle, and builds the correct time blocks:
 `10' Gamification, 20' Technical, 25' Tactical` for Mon/Thu, three SSG stations
 for Tue/Fri, and the 60-minute Arrival / Development / Festival shape for 13+.
 
-**A drill board.** Drag-and-drop players, equipment, zones and movement arrows
+**A practice board.** Drag-and-drop players, equipment, zones and movement arrows
 on five pitch presets. Every practice in the library is game-based; the
-methodology rules out cone-only drills.
+methodology rules out cone-only practices.
 
 **A methodology check.** Ball rolling time against the 70% target, scoring
 systems, differentiation, guided questions, principle coverage, and
@@ -41,7 +41,7 @@ every coach at their next load.
 app/                the planner (static files, no build step)
   index.html        markup and the sign-in gate
   styles.css
-  planner.js        curriculum, drill board, methodology check
+  planner.js        curriculum, practice board, methodology check
   api.js            Supabase Auth + PostgREST client, no SDK
   cloud.js          sign-in, sync, club library
   config.js         your backend URL and public key

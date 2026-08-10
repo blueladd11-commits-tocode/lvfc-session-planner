@@ -87,7 +87,7 @@
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
         <rect x="1.6" y="1.6" width="5.2" height="5.2" rx="1.2"/><rect x="9.2" y="1.6" width="5.2" height="5.2" rx="1.2"/>
         <rect x="1.6" y="9.2" width="5.2" height="5.2" rx="1.2"/><rect x="9.2" y="9.2" width="5.2" height="5.2" rx="1.2"/>
-      </svg>Drill library</button>
+      </svg>Practice library</button>
     <div class="who" id="who" hidden>
       <span class="dot-on" aria-hidden="true"></span>
       <span class="who-name" id="whoName">Signed in</span>
@@ -183,7 +183,7 @@
     </aside>
 
     <!-- ============ pitch ============ -->
-    <section class="stage" aria-label="Drill designer">
+    <section class="stage" aria-label="Practice designer">
       <div class="stage-bar">
         <span class="bar-label">Pitch</span>
         <div class="seg" id="pitchSeg"></div>
@@ -196,7 +196,7 @@
         <button class="btn ghost danger" id="btnClear">Clear pitch</button>
       </div>
 
-      <svg id="board" viewBox="0 0 1000 640" role="img" aria-label="Drill diagram"></svg>
+      <svg id="board" viewBox="0 0 1000 640" role="img" aria-label="Practice diagram"></svg>
 
       <div class="strip">
         <div class="strip-h">
@@ -205,7 +205,7 @@
           <button class="btn ghost" id="btnDup">Duplicate</button>
           <button class="btn ghost" id="btnLeft" title="Move earlier">&larr;</button>
           <button class="btn ghost" id="btnRight" title="Move later">&rarr;</button>
-          <button class="btn ghost danger" id="btnDelDrill">Delete drill</button>
+          <button class="btn ghost danger" id="btnDelDrill">Delete practice</button>
         </div>
         <div class="cards" id="cards"></div>
       </div>
@@ -280,8 +280,8 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-h">
       <div style="flex:1">
-        <h2 id="modalTitle">Drill library</h2>
-        <p id="modalSub">Pick a drill &mdash; it drops in fully set up, with coaching points already written.</p>
+        <h2 id="modalTitle">Practice library</h2>
+        <p id="modalSub">Pick a practice &mdash; it drops in fully set up, with coaching points already written.</p>
       </div>
       <button class="btn ghost" id="btnCloseModal" aria-label="Close">&#10005;</button>
     </div>

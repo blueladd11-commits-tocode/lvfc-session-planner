@@ -298,7 +298,7 @@ function curr(){
    state
    ============================================================ */
 let S = null;           // session
-let cur = 0;            // current drill index
+let cur = 0;            // current practice index
 let sel = null;         // selected item id
 let armed = null;       // {kind:'el', spec} | {kind:'arrow', style} | null
 let undoStack = [];
@@ -528,7 +528,7 @@ function thumbSVG(d){
 }
 
 /* ============================================================
-   drill library
+   practice library
    ============================================================ */
 function LIB(){ return [
   {
@@ -802,7 +802,7 @@ function renderCards(){
         <span class="nm">${esc(d.name)}</span>
         <span class="mins">${+d.mins||0}'</span></div>
     </button>`).join("") +
-    `<button class="addcard" id="addDrill">\uFF0B Add drill</button>`;
+    `<button class="addcard" id="addDrill">\uFF0B Add practice</button>`;
 
   c.querySelectorAll(".card").forEach(b => b.onclick = () => {
     cur = +b.dataset.i; sel = null; syncFields(); render();
@@ -1487,9 +1487,9 @@ function methodHTML(){
     `<div class="mrow"><span class="mn">${p.id}</span>
       <span><b>${p.name}</b><em>${p.line}</em></span></div>`).join("") + `</div>
     <p style="margin:14px 0 0;font-size:12px;color:var(--slate);line-height:1.6">
-      From the LVFC Coaching Methodology. The objective is not to complete drills, but to develop
+      From the LVFC Coaching Methodology. The objective is not to complete practices, but to develop
       adaptable, intelligent, confident and expressive footballers. Every practice in the library is
-      game-based &mdash; the methodology rules out robotic cone-only drills.</p>`;
+      game-based &mdash; the methodology rules out robotic cone-only practices.</p>`;
 }
 
 function fromLib(t){
@@ -1603,7 +1603,7 @@ function toast(msg){
 
 function wireChrome(){
   $("btnTemplates").onclick = () => {
-    openModal("Drill library", "Pick a drill \u2014 it drops in fully set up, with coaching points already written.", libraryHTML());
+    openModal("Practice library", "Pick a practice \u2014 it drops in fully set up, with coaching points already written.", libraryHTML());
     wireLibrary();
   };
   $("btnBuild").onclick = buildSession;
