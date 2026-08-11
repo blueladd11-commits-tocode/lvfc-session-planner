@@ -338,6 +338,9 @@ function blankDrill(name){
 }
 /* older saved sessions predate the methodology fields - fill them in */
 function upgrade(d){
+  // Mannequins were withdrawn from the kit list; drop any a saved diagram
+  // still carries so they do not linger invisibly in the data.
+  if(Array.isArray(d.items)) d.items = d.items.filter(i => i.type !== "mann");
   // Sessions saved before durations were derived carry a flat 15 minutes on
   // blocks the curriculum fixes at another length (Gamification is 10). Repair
   // them on load so nobody has to rebuild a session by hand.
@@ -496,11 +499,6 @@ function itemSVG(it, isSel){
       return open() + halo(16) +
         `<ellipse rx="13" ry="6" fill="#F5C518" stroke="#8A6A05" stroke-width="1.4"/>` +
         `<ellipse rx="6.5" ry="2.6" fill="rgba(255,255,255,.45)"/></g>`;
-    case "mann":
-      return open() + halo(24) +
-        `<ellipse cx="0" cy="21" rx="11" ry="4" fill="rgba(0,0,0,.22)"/>` +
-        `<rect x="-8" y="-8" width="16" height="29" rx="7.5" fill="#586A60" stroke="#26332C" stroke-width="1.6"/>` +
-        `<circle cy="-15" r="7" fill="#586A60" stroke="#26332C" stroke-width="1.6"/></g>`;
     case "goal":
     case "minigoal":{
       const w = it.type === "goal" ? 96 : 56, d = it.type === "goal" ? 20 : 14;
@@ -862,8 +860,7 @@ function renderSel(){
     body.innerHTML = `<p class="sel-none">Nothing selected.<br/>Click an item on the pitch to change its kit, size or angle.</p>`;
     return;
   }
-  const names = {player:"Player", ball:"Ball", cone:"Cone", disc:"Marker disc", mann:"Mannequin",
-                 goal:"Full goal", minigoal:"Mini goal", zone:"Zone", text:"Label", arrow:"Arrow"};
+  const names = {player:"Player", ball:"Ball", cone:"Cone", disc:"Marker disc", goal:"Full goal", minigoal:"Mini goal", zone:"Zone", text:"Label", arrow:"Arrow"};
   const sw = it.type === "player" ? (KITS[it.team]||KITS.a).fill
            : it.type === "arrow" ? (ARROWS[it.style]||ARROWS.run).stroke : "var(--slate)";
 
