@@ -365,7 +365,6 @@ const P  = (team,x,y,label) => ({id:nid(),type:"player",team,x,y,label:label||""
 const B  = (x,y)            => ({id:nid(),type:"ball",x,y,s:1,r:0});
 const C  = (x,y)            => ({id:nid(),type:"cone",x,y,s:1,r:0});
 const D  = (x,y)            => ({id:nid(),type:"disc",x,y,s:1,r:0});
-const M  = (x,y)            => ({id:nid(),type:"mann",x,y,s:1,r:0});
 const G  = (x,y,r)          => ({id:nid(),type:"goal",x,y,s:1,r:r||0});
 const MG = (x,y,r)          => ({id:nid(),type:"minigoal",x,y,s:1,r:r||0});
 const Z  = (x,y,w,h)        => ({id:nid(),type:"zone",x,y,w:w,h:h,s:1,r:0});
@@ -910,8 +909,8 @@ function renderSel(){
                  esc(KITS[k].name)}</button>`).join("")}
             </div>
             <div class="chips">
-              ${["ball","cone","disc","mann"].map(t => `<button class="chip" data-fill="${t}">${
-                 ({ball:"Balls",cone:"Cones",disc:"Discs",mann:"Mannequins"})[t]}</button>`).join("")}
+              ${["ball","cone","disc"].map(t => `<button class="chip" data-fill="${t}">${
+                 ({ball:"Balls",cone:"Cones",disc:"Discs"})[t]}</button>`).join("")}
             </div>`;
     }
   }
@@ -993,7 +992,6 @@ function buildPalette(){
     mk(icon("ball"),     "Ball",      {kind:"el", type:"ball"}) +
     mk(icon("cone"),     "Cone",      {kind:"el", type:"cone"}) +
     mk(icon("disc"),     "Disc",      {kind:"el", type:"disc"}) +
-    mk(icon("mann"),     "Mannequin", {kind:"el", type:"mann"}) +
     mk(icon("minigoal"), "Mini goal", {kind:"el", type:"minigoal"}) +
     mk(icon("goal"),     "Full goal", {kind:"el", type:"goal"}) +
     mk(`<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
