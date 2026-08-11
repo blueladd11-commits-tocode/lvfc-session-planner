@@ -817,6 +817,7 @@ const $ = id => document.getElementById(id);
 const board = $("board");
 
 function render(){
+  ensureFeedback();
   board.innerHTML = drillSVG(drill(), sel);
   board.classList.toggle("placing", !!armed && armed.kind === "el");
   board.classList.toggle("drawing", !!armed && armed.kind === "arrow");
@@ -850,6 +851,7 @@ function renderCards(){
     const nb = nextBlock(S.drills.length);
     const d = practiceFromBlock(nb.name, Math.min(nb.mins, room));
     S.drills.push(d);
+    ensureFeedback();
     cur = S.drills.length-1; sel = null; syncFields(); render(); save();
   };
 }
@@ -1244,14 +1246,55 @@ function renderCurric(){
      <div class="cr"><b>Month format</b><span>${esc(q.m.format)}</span></div>
      <div class="cr"><b>Key theme</b><span>${esc(q.m.theme)}</span></div>
      <div class="cr"><b>${esc(q.d.short)} shape</b><span>${
-        q.d.blocks.map(b => b[1] + "' " + esc(b[0])).join(" &middot; ")} &middot; ${mins} min</span></div>`;
+        q.d.blocks.map(b => b[1] + "' " + esc(b[0])).join(" &middot; ")} &middot; ${
+        FEEDBACK_MINS}' Feedback &middot; ${mins} + ${FEEDBACK_MINS} = ${mins + FEEDBACK_MINS} min</span></div>`;
+}
+
+/* Every session ends the same way: the players are brought in and asked what
+   they learned. It is fixed at five minutes, always last, and sits outside the
+   55-minute coaching ceiling - so a coach can never plan it away. */
+const FEEDBACK_MINS = 5;
+const isFeedback = d => d.feedback === true || d.name === "Feedback";
+
+function makeFeedback(){
+  const d = blankDrill("Feedback");
+  d.feedback = true;
+  d.mins = FEEDBACK_MINS;
+  d.pitch = "area";
+  d.rolling = 0;
+  d.prin = [3,6,9];
+  d.org = "Bring everyone in. Five minutes, players doing most of the talking.";
+  d.pts = "Players recalling their own decisions, not yours\nEveryone contributes something\nFinish on what went well";
+  d.questions = "What did you get better at today?\nWhat was the hardest moment, and what did you try?\nWhat will you work on before the next session?";
+  return d;
+}
+
+/* Exactly one feedback block, always at the end, always five minutes. */
+function ensureFeedback(){
+  const others = S.drills.filter(d => !isFeedback(d));
+  let fb = S.drills.find(isFeedback);
+  if(!fb) fb = makeFeedback();
+  fb.feedback = true;
+  fb.name = "Feedback";
+  fb.mins = FEEDBACK_MINS;
+  const next = others.concat([fb]);
+  const changed = next.length !== S.drills.length ||
+                  next.some((d,i) => d !== S.drills[i]);
+  if(changed){
+    const wasAt = S.drills[cur];
+    S.drills = next;
+    const found = next.indexOf(wasAt);
+    cur = found >= 0 ? found : Math.min(cur, next.length - 1);
+  }
+  if(cur < 0 || cur >= S.drills.length) cur = 0;
 }
 
 /* How long the session runs, and how much room is left inside the ceiling. */
 function totalMins(){ return S.drills.reduce((a,d) => a + (+d.mins||0), 0); }
 function capMins(){ return +CFG.maxMinutes || 55; }
 function roomLeft(exclude){
-  return capMins() - S.drills.reduce((a,d,i) => a + (i === exclude ? 0 : (+d.mins||0)), 0);
+  return capMins() - S.drills.reduce(
+    (a,d,i) => a + ((i === exclude || isFeedback(d)) ? 0 : (+d.mins||0)), 0);
 }
 
 /* One practice, derived from the curriculum. A coach should never have to
@@ -1299,6 +1342,7 @@ function buildSession(){
   const q = curr();
   snap();
   S.drills = q.d.blocks.map(([name, mins]) => practiceFromBlock(name, mins));
+  S.drills.push(makeFeedback());
   S.title = q.c.label + " " + q.b.title + " - " + q.d.short;
   cur = 0; sel = null; armed = null;
   syncFields(); paintTools(); render(); save();
@@ -1319,7 +1363,7 @@ function renderPrin(){
 
 /* ---- the methodology made measurable ---- */
 function analyse(){
-  const ds = S.drills.map(upgrade);
+  const ds = S.drills.map(upgrade).filter(d => !isFeedback(d));
   const total = ds.reduce((a,d) => a + (+d.mins||0), 0) || 1;
 
   // weighted ball rolling time across the session
@@ -1389,6 +1433,7 @@ function bindFields(){
   bind("mCoach", v => S.coach = v);
   bind("dName",  v => drill().name = v, renderCards);
   bind("dMins",  v => {
+                        if(isFeedback(drill())){ $("dMins").value = FEEDBACK_MINS; return; }
                         const room = roomLeft(cur);
                         let want = Math.max(0, +v || 0);
                         if(want > room){ want = Math.max(0, room); toast("Capped at " + capMins() + " minutes for the session"); }
@@ -1644,7 +1689,7 @@ function wireLibrary(){
   const bl = b.querySelector("[data-blank]");
   if(bl) bl.onclick = () => {
     snap();
-    S.drills = [practiceFromBlock(nextBlock(0).name, nextBlock(0).mins)];
+    S.drills = [practiceFromBlock(nextBlock(0).name, nextBlock(0).mins), makeFeedback()];
     cur = 0; sel = null; armed = null;
     closeModal(); syncFields(); paintTools(); render(); save();
   };
@@ -1791,13 +1836,15 @@ function wireChrome(){
     syncFields(); render(); save();
   };
   $("btnDelDrill").onclick = () => {
-    if(S.drills.length === 1) return toast("A session needs at least one drill");
+    if(isFeedback(drill())) return toast("Every session ends with feedback - this one stays");
+    if(S.drills.filter(d => !isFeedback(d)).length === 1) return toast("A session needs at least one practice");
     snap(); S.drills.splice(cur,1);
     cur = Math.max(0, cur-1); sel = null; syncFields(); render(); save();
   };
   const move = dir => {
     const j = cur + dir;
     if(j < 0 || j >= S.drills.length) return;
+    if(isFeedback(drill()) || isFeedback(S.drills[j])) return toast("Feedback always comes last");
     snap();
     [S.drills[cur], S.drills[j]] = [S.drills[j], S.drills[cur]];
     cur = j; render(); save();
