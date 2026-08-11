@@ -9,7 +9,11 @@ const KITS = {
   a:{fill:"#EC1C24", text:"#fff", name:"Red"},
   b:{fill:"#2563EB", text:"#fff", name:"Blue"},
   g:{fill:"#F0A63A", text:"#3A2606", name:"Keeper"},
-  n:{fill:"#FFFFFF", text:"#15201A", name:"Neutral"}
+  n:{fill:"#FFFFFF", text:"#15201A", name:"White"},
+  k:{fill:"#18212B", text:"#fff",    name:"Black"},
+  p:{fill:"#7C3AED", text:"#fff",    name:"Purple"},
+  o:{fill:"#F97316", text:"#3A1D02", name:"Orange"},
+  t:{fill:"#14B8A6", text:"#04322C", name:"Teal"}
 };
 const PITCHES = [
   {id:"full",  label:"Full"},
@@ -212,18 +216,18 @@ const DAYS = {
   "mon-thu":{name:"Technical Foundation", short:"Mon / Thu",
     blocks:[["Gamification",10],["Technical (Unopposed)",20],["Tactical (Opposed)",25]]},
   "tue-fri":{name:"SSG Stations", short:"Tue / Fri",
-    blocks:[["SSG Station 1",20],["SSG Station 2",20],["SSG Station 3",20]]},
+    blocks:[["Gamification",10],["SSG Stations",45]]},
   "wed-sat":{name:"Match Application", short:"Wed / Sat",
     blocks:[["Gamification",10],["Match / Festival Stage",45]]}
 };
 /* 13+ runs the explicit 60-minute session shape */
 const DAYS13 = {
   "mon-thu":{name:"Technical Application", short:"Mon / Thu",
-    blocks:[["Arrival Activity",10],["Development Block",30],["Festival Stage",20]]},
+    blocks:[["Arrival Activity",10],["Development Block",25],["Festival Stage",20]]},
   "tue-fri":{name:"Tactical Workshop", short:"Tue / Fri",
-    blocks:[["Arrival Activity",10],["Development Block",30],["Festival Stage",20]]},
+    blocks:[["Arrival Activity",10],["SSG Stations",45]]},
   "wed-sat":{name:"Festival Stage", short:"Wed / Sat",
-    blocks:[["Arrival Activity",10],["Match Play 7v7 / 9v9",50]]}
+    blocks:[["Arrival Activity",10],["Match Play 7v7 / 9v9",45]]}
 };
 /* ============================================================
    club configuration - what coaches are allowed to choose.
@@ -239,6 +243,7 @@ const CFG_DEFAULT = {
   allowOverride:true,      // may a coach override the derived position?
   lockDurations:false,     // may a coach change block minutes?
   requireFields:false,     // must scoring + differentiation be filled before printing?
+  maxMinutes:55,           // a session may not run longer than this
   locked:false             // true in a coach edition: settings are read-only
 };
 let CFG = Object.assign({}, CFG_DEFAULT);
@@ -304,7 +309,8 @@ function curr(){
    ============================================================ */
 let S = null;           // session
 let cur = 0;            // current practice index
-let sel = null;         // selected item id
+let sel = null;         // the item the inspector is showing
+let selSet = new Set(); // everything currently selected; sel is one of these
 let armed = null;       // {kind:'el', spec} | {kind:'arrow', style} | null
 let undoStack = [];
 let uid = 1;
@@ -476,8 +482,12 @@ function itemSVG(it, isSel){
     case "ball":
       return open() + halo(17) +
         `<ellipse cx="0" cy="11" rx="9" ry="3" fill="rgba(0,0,0,.25)"/>` +
-        `<circle r="9.5" fill="#fff" stroke="${DARK}" stroke-width="1.6"/>` +
-        `<path d="M0,-5 L4.8,-1.5 L3,4.2 L-3,4.2 L-4.8,-1.5 Z" fill="${DARK}"/></g>`;
+        `<circle r="9.5" fill="#fff" stroke="${DARK}" stroke-width="1.3"/>` +
+        `<path d="M0,-5.2 L4.9,-1.6 L3.1,4.2 L-3.1,4.2 L-4.9,-1.6 Z" fill="${DARK}"/>` +
+        `<path d="M0,-9.5 L0,-5.2 M4.9,-1.6 L9.1,-3 M3.1,4.2 L5.7,7.7 M-3.1,4.2 L-5.7,7.7 M-4.9,-1.6 L-9.1,-3"
+           stroke="${DARK}" stroke-width="1.4" stroke-linecap="round"/>` +
+        `<path d="M6.9,6.9 A9.5 9.5 0 0 0 9.4,1.2 M-6.9,6.9 A9.5 9.5 0 0 1 -9.4,1.2 M-6.6,-6.9 A9.5 9.5 0 0 1 6.6,-6.9"
+           fill="none" stroke="${DARK}" stroke-width="1" opacity=".5"/></g>`;
     case "cone":
       return open() + halo(20) +
         `<ellipse cx="0" cy="12" rx="13" ry="4" fill="rgba(0,0,0,.22)"/>` +
@@ -544,7 +554,7 @@ const DEFS = `<defs>
 
 function drillSVG(d, selId){
   return DEFS + pitchBG(d.pitch) +
-    `<g>` + d.items.map(it => itemSVG(it, it.id === selId)).join("") + `</g>`;
+    `<g>` + d.items.map(it => itemSVG(it, selId ? (selId === it.id || selSet.has(it.id)) : false)).join("") + `</g>`;
 }
 function thumbSVG(d){
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${drillSVG(d,null)}</svg>`;
@@ -831,9 +841,15 @@ function renderCards(){
     cur = +b.dataset.i; sel = null; syncFields(); render();
   });
   $("addDrill").onclick = () => {
+    const room = roomLeft(-1);
+    if(room <= 0){
+      toast("A session is capped at " + capMins() + " minutes - shorten a practice first");
+      return;
+    }
     snap();
     const nb = nextBlock(S.drills.length);
-    S.drills.push(practiceFromBlock(nb.name, nb.mins));
+    const d = practiceFromBlock(nb.name, Math.min(nb.mins, room));
+    S.drills.push(d);
     cur = S.drills.length-1; sel = null; syncFields(); render(); save();
   };
 }
@@ -880,6 +896,22 @@ function renderSel(){
               <div class="stepper"><button data-act="r-">\u27F2</button><button data-act="r+">\u27F3</button></div>
             </div>`;
     }
+    if(it.type === "zone"){
+      h += `<div class="ctl-row"><span>Size</span>
+              <div class="stepper"><button data-act="w-" title="Narrower">\u2194\u2212</button><button data-act="w+" title="Wider">\u2194\u002B</button></div>
+              <div class="stepper"><button data-act="h-" title="Shorter">\u2195\u2212</button><button data-act="h+" title="Taller">\u2195\u002B</button></div>
+            </div>
+            <p class="gate-hint" style="margin:2px 0 4px">Drop straight into this zone:</p>
+            <div class="chips" style="margin-bottom:5px">
+              ${Object.keys(KITS).map(k => `<button class="chip" data-fill="player:${k}"
+                 style="background:${KITS[k].fill};color:${KITS[k].text};border-color:transparent">${
+                 esc(KITS[k].name)}</button>`).join("")}
+            </div>
+            <div class="chips">
+              ${["ball","cone","disc","mann"].map(t => `<button class="chip" data-fill="${t}">${
+                 ({ball:"Balls",cone:"Cones",disc:"Discs",mann:"Mannequins"})[t]}</button>`).join("")}
+            </div>`;
+    }
   }
   h += `<button class="btn danger" data-act="del" style="width:100%;justify-content:center">Remove item</button></div>`;
   body.innerHTML = h;
@@ -895,6 +927,25 @@ function renderSel(){
   const txt = $("tTxt");
   if(txt) txt.oninput = () => { it.text = txt.value; board.innerHTML = drillSVG(drill(), sel); save(); };
 
+  // Filling a zone drops four props inside its bounds, so a coach never has to
+  // place them one by one and eyeball whether they sit in the area.
+  body.querySelectorAll("[data-fill]").forEach(b => b.onclick = () => {
+    snap();
+    const spec = b.dataset.fill.split(":");
+    const w = it.w || 240, h = it.h || 170;
+    for(const dy of [-h/4, h/4]) for(const dx of [-w/4, w/4]){
+      const x = it.x + dx, y = it.y + dy;
+      if(spec[0] === "player"){
+        const num = drill().items.filter(i => i.type === "player" && i.team === spec[1]).length + 1;
+        drill().items.push(P(spec[1], x, y, String(num)));
+      } else {
+        drill().items.push({id:nid(), type:spec[0], x, y, s:1, r:0});
+      }
+    }
+    render(); save();
+    toast("Added into the zone");
+  });
+
   body.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
     snap();
     const a = b.dataset.act;
@@ -902,6 +953,10 @@ function renderSel(){
     if(a === "s-") it.s = Math.max(.45, (it.s||1) - .15);
     if(a === "r+") it.r = ((it.r||0) + 15) % 360;
     if(a === "r-") it.r = ((it.r||0) - 15) % 360;
+    if(a === "w+") it.w = Math.min(900, (it.w||240) + 40);
+    if(a === "w-") it.w = Math.max(80,  (it.w||240) - 40);
+    if(a === "h+") it.h = Math.min(560, (it.h||170) + 40);
+    if(a === "h-") it.h = Math.max(60,  (it.h||170) - 40);
     if(a === "del"){ drill().items = drill().items.filter(x => x.id !== it.id); sel = null; }
     render(); save();
   });
@@ -1007,14 +1062,18 @@ board.addEventListener("pointerdown", e => {
     snap();
     const t = armed.type;
     let it;
-    if(t === "player")        it = P(armed.team, p.x, p.y, "");
+    if(t === "player"){
+      // number them as they go down, per kit, so a coach never types a squad list
+      const num = drill().items.filter(i => i.type === "player" && i.team === armed.team).length + 1;
+      it = P(armed.team, p.x, p.y, String(num));
+    }
     else if(t === "zone")     it = Z(p.x, p.y, 240, 170);
     else if(t === "text")     it = T(p.x, p.y, "Label");
     else if(t === "goal")     it = G(p.x, p.y, 0);
     else if(t === "minigoal") it = MG(p.x, p.y, 0);
     else it = {id:nid(), type:t, x:p.x, y:p.y, s:1, r:0};
     drill().items.push(it);
-    sel = it.id;
+    sel = it.id; selSet = new Set([it.id]);
     drag = {mode:"move", id:it.id, dx:0, dy:0};
     try{ board.setPointerCapture(e.pointerId); }catch(_){}
     render(); save();
@@ -1025,6 +1084,8 @@ board.addEventListener("pointerdown", e => {
   if(hit){
     const id = hit.dataset.id;
     const it = drill().items.find(x => x.id === id);
+    if(e.shiftKey){ selSet.add(id); }
+    else if(!selSet.has(id)){ selSet = new Set([id]); }
     sel = id;
     snap();
     if(it.type === "arrow"){
@@ -1041,7 +1102,7 @@ board.addEventListener("pointerdown", e => {
     return;
   }
 
-  sel = null;
+  sel = null; selSet.clear();
   render();
 });
 
@@ -1051,7 +1112,17 @@ board.addEventListener("pointermove", e => {
   const it = drill().items.find(x => x.id === drag.id);
   if(!it){ drag = null; return; }
 
-  if(drag.mode === "move"){ it.x = p.x + drag.dx; it.y = p.y + drag.dy; }
+  if(drag.mode === "move"){
+    const nx = p.x + drag.dx, ny = p.y + drag.dy;
+    if(selSet.size > 1 && selSet.has(it.id)){
+      const ddx = nx - it.x, ddy = ny - it.y;
+      drill().items.forEach(o => {
+        if(!selSet.has(o.id)) return;
+        if(o.type === "arrow"){ o.x1 += ddx; o.y1 += ddy; o.x2 += ddx; o.y2 += ddy; }
+        else { o.x += ddx; o.y += ddy; }
+      });
+    } else { it.x = nx; it.y = ny; }
+  }
   else if(drag.mode === "arrow-end"){ it.x2 = p.x; it.y2 = p.y; }
   else if(drag.mode === "arrow-start"){ it.x1 = p.x; it.y1 = p.y; }
   else if(drag.mode === "arrow-move"){
@@ -1174,6 +1245,13 @@ function renderCurric(){
      <div class="cr"><b>Key theme</b><span>${esc(q.m.theme)}</span></div>
      <div class="cr"><b>${esc(q.d.short)} shape</b><span>${
         q.d.blocks.map(b => b[1] + "' " + esc(b[0])).join(" &middot; ")} &middot; ${mins} min</span></div>`;
+}
+
+/* How long the session runs, and how much room is left inside the ceiling. */
+function totalMins(){ return S.drills.reduce((a,d) => a + (+d.mins||0), 0); }
+function capMins(){ return +CFG.maxMinutes || 55; }
+function roomLeft(exclude){
+  return capMins() - S.drills.reduce((a,d,i) => a + (i === exclude ? 0 : (+d.mins||0)), 0);
 }
 
 /* One practice, derived from the curriculum. A coach should never have to
@@ -1310,7 +1388,12 @@ function bindFields(){
   bind("mDate",  v => { S.date = v; posOverridden = false; applyDerived(); syncFields(); renderCurric(); });
   bind("mCoach", v => S.coach = v);
   bind("dName",  v => drill().name = v, renderCards);
-  bind("dMins",  v => { drill().mins = Math.max(0, +v || 0);
+  bind("dMins",  v => {
+                        const room = roomLeft(cur);
+                        let want = Math.max(0, +v || 0);
+                        if(want > room){ want = Math.max(0, room); toast("Capped at " + capMins() + " minutes for the session"); }
+                        drill().mins = want;
+                        if(+$("dMins").value !== want) $("dMins").value = want;
                         $("totalMins").textContent = S.drills.reduce((a,d)=>a+(+d.mins||0),0);
                         renderCards(); renderCheck(); });
   bind("dOrg",   v => drill().org = v);
@@ -1425,6 +1508,11 @@ function adminHTML(){
 
     <div class="asec">
       <p class="pal-title">Planning rules</p>
+      <div class="field" style="max-width:260px;margin-bottom:9px">
+        <label for="cfgMax">Longest a session may run</label>
+        <select id="cfgMax">${[45,50,55,60,75,90].map(n =>
+          `<option value="${n}" ${(+CFG.maxMinutes||55)===n?"selected":""}>${n} minutes</option>`).join("")}</select>
+      </div>
       <div class="opts">
         ${chk("lockDurations", CFG.lockDurations, "Lock block durations",
               "Coaches cannot change the minutes the curriculum sets.")}
@@ -1477,6 +1565,8 @@ function wireAdmin(){
     CFG.practices = on.length === all.length ? null : on;
     saveCfg();
   });
+  const mx = $("cfgMax");
+  if(mx) mx.onchange = () => { CFG.maxMinutes = +mx.value; saveCfg(); syncFields(); render(); };
   const an = $("cfgAnchor");
   if(an) an.onchange = () => { CFG.quarterAnchor = +an.value; saveCfg(); syncFields(); renderCurric(); };
   const rs = $("cfgReset");
@@ -1680,6 +1770,14 @@ function wireChrome(){
     buildPrint(); setTimeout(() => window.print(), 60);
   };
   $("btnUndo").onclick = undo;
+  $("btnSelectAll").onclick = () => {
+    const items = drill().items;
+    if(!items.length) return toast("Nothing on the pitch yet");
+    selSet = new Set(items.map(i => i.id));
+    sel = items[items.length - 1].id;
+    render();
+    toast(items.length + " selected - drag to move them together, Del to remove");
+  };
   $("btnClear").onclick = () => {
     if(!drill().items.length) return;
     snap(); drill().items = []; sel = null; render(); save(); toast("Pitch cleared \u2014 undo if that was a mistake");
@@ -1713,12 +1811,13 @@ function wireChrome(){
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
     if((e.key === "Delete" || e.key === "Backspace") && sel && !typing){
       e.preventDefault(); snap();
-      drill().items = drill().items.filter(x => x.id !== sel);
-      sel = null; render(); save();
+      const gone = selSet.size ? selSet : new Set([sel]);
+      drill().items = drill().items.filter(x => !gone.has(x.id));
+      sel = null; selSet.clear(); render(); save();
     }
     if(e.key === "Escape"){
       if(!$("scrim").hidden) closeModal();
-      else { sel = null; armed = null; paintTools(); render(); }
+      else { sel = null; selSet.clear(); armed = null; paintTools(); render(); }
     }
     if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !typing){ e.preventDefault(); undo(); }
     if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s"){ e.preventDefault(); save(); toast("Session saved"); }
